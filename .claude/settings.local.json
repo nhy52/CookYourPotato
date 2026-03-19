@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install @nestjs/typeorm pg bcrypt @types/bcrypt)",
+      "Bash(npm run build)",
+      "Bash(npx jest users.service.spec.ts --verbose)"
+    ]
+  }
+}
