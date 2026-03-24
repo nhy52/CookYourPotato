@@ -7,7 +7,9 @@
       "Bash(git rm --cached backend)",
       "Bash(git add backend)",
       "Bash(git commit -m \"fix: backend 서브모듈 → 일반 폴더로 변경\")",
-      "Bash(git ls-tree HEAD)"
+      "Bash(git ls-tree HEAD)",
+      "Bash(npm install phaser)",
+      "Bash(npx vue-tsc --noEmit)"
     ]
   }
 }
