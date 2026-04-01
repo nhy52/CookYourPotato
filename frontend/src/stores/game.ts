@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { updatePotato } from '@/api/potato'
 
 export type GameActivity = 'idle' | 'working' | 'studying' | 'resting' | 'delinquent'
 
@@ -79,6 +80,9 @@ const STAT_LABELS: Record<keyof Stats, string> = {
 }
 
 export const useGameStore = defineStore('game', () => {
+  const potatoName = ref('')
+  const birthday = ref('')
+
   const stats = ref<Stats>({
     constitution: 30,
     intelligence: 20,
@@ -243,6 +247,7 @@ export const useGameStore = defineStore('game', () => {
       applyStats(leaniDelta)
       addMsg(`공원 벤치에서 옆에 있는 누군가에게 기댔어요. 따뜻해요... 💕\n${deltaText(leaniDelta)}`, 'event')
     }
+    saveToDB().catch(console.error)
   }
 
   function _openShop() {
@@ -271,6 +276,7 @@ export const useGameStore = defineStore('game', () => {
       `${item.label.split(' (')[0]}을(를) 샀어요! ${item.desc}\n${deltaText(item.delta, -item.price)}`,
       'event',
     )
+    saveToDB().catch(console.error)
   }
 
   function _walkPlaza() {
@@ -279,6 +285,7 @@ export const useGameStore = defineStore('game', () => {
     addMsg(
       `${pick(['마을 광장에서 사람들과 어울렸어요! 사교성이 올라요 🎭', '광장에서 공연을 구경했어요! 즐거워요.', '광장에서 새로운 감자 친구를 사귀었어요!'])}\n${deltaText(delta)}`,
     )
+    saveToDB().catch(console.error)
   }
 
   // ── 고강도 알바 (HP 4 소모, +40원) ──────────────────────────
@@ -319,6 +326,7 @@ export const useGameStore = defineStore('game', () => {
         `${pick(['광산 노동... 엄청 힘들어요 ⛏️', '광산 일은 고되지만 몸은 단단해져요.', '온몸이 흙투성이. 근데 뭔가 씩씩해진 느낌?'])}\n${deltaText(delta, 40)}`,
       )
     }
+    saveToDB().catch(console.error)
   }
 
   // ── 저강도 알바 (HP 3 소모, +25원) ──────────────────────────
@@ -343,6 +351,7 @@ export const useGameStore = defineStore('game', () => {
         `${pick(['아침 조깅! 상쾌해요 🏃', '달리기는 스트레스 해소가 최고예요!', '오늘도 달렸어요. 폐활량이 좋아져요!'])}\n${deltaText(delta, 25)}`,
       )
     }
+    saveToDB().catch(console.error)
   }
 
   // ── 교육 (HP 2 소모, -20원) ──────────────────────────────────
@@ -400,6 +409,7 @@ export const useGameStore = defineStore('game', () => {
         `${pick(['성당에서 미사를 드렸어요. 마음이 평온해요 ⛪', '성당 교육! 좋은 사람이 되어야겠다고 생각했어요.', '신부님의 말씀이 마음에 와닿았어요.'])}\n${deltaText(delta, -20)}`,
       )
     }
+    saveToDB().catch(console.error)
   }
 
   // ── 휴식 (HP 0 소모) ─────────────────────────────────────────
@@ -444,6 +454,7 @@ export const useGameStore = defineStore('game', () => {
         )
       }
     }
+    saveToDB().catch(console.error)
   }
 
   // ── 다음 날로 ────────────────────────────────────────────────
@@ -474,6 +485,7 @@ export const useGameStore = defineStore('game', () => {
 
     dailyHp.value = maxDailyHp
     addMsg(`☀️ ${day.value}일째 아침이 밝았어요!`)
+    saveToDB().catch(console.error)
   }
 
   function triggerEnding() {
@@ -483,6 +495,7 @@ export const useGameStore = defineStore('game', () => {
     endingDetail.value = result.detail
     addMsg(`🎬 ${result.name}`, 'ending')
     addMsg(result.detail, 'ending')
+    saveToDB().catch(console.error)
   }
 
   function calcEnding(): { name: string; detail: string } {
@@ -545,20 +558,82 @@ export const useGameStore = defineStore('game', () => {
     leaniEvents.value = 0
     rustleEvents.value = 0
     msgId = 0
-    addMsg('안녕하세요! 저는 아직 어린 감자예요. 잘 키워주세요! 🥔')
+    addMsg(`안녕하세요! 저는 ${potatoName.value || '감자'}예요. 잘 키워주세요! 🥔`)
     addMsg('💰 시작 용돈 300원을 받았어요! 교육비는 회당 20원이에요.')
   }
 
-  // 초기 메시지
-  addMsg('안녕하세요! 저는 아직 어린 감자예요. 잘 키워주세요! 🥔')
-  addMsg('💰 시작 용돈 300원을 받았어요! 교육비는 회당 20원이에요.')
+  // DB에서 불러와서 상태 복원
+  function loadFromDb(potato: any) {
+    potatoName.value = potato.name
+    birthday.value = potato.birthday
+    day.value = potato.day
+    dailyHp.value = potato.dailyHp
+    phase.value = potato.phase as 'day' | 'ended'
+    ending.value = potato.ending ?? null
+    endingDetail.value = potato.endingDetail ?? null
+    stats.value = {
+      constitution: potato.constitution,
+      intelligence: potato.intelligence,
+      grace: potato.grace,
+      charm: potato.charm,
+      sensitivity: potato.sensitivity,
+      morality: potato.morality,
+      mental: potato.mental,
+      stress: potato.stress,
+    }
+    money.value = potato.money
+    isDelinquent.value = potato.isDelinquent
+    kogumaEncountered.value = potato.kogumaEncountered
+    counts.value = potato.counts ?? { nightGuard: 0, tavern: 0, farm: 0, mine: 0, jog: 0, library: 0, etiquette: 0, arts: 0, church: 0, street: 0, totalWork: 0 }
+    rainEvents.value = potato.rainEvents ?? 0
+    leaniEvents.value = potato.leaniEvents ?? 0
+    rustleEvents.value = potato.rustleEvents ?? 0
+    chatLog.value = []
+    msgId = 0
+    currentActivity.value = isDelinquent.value ? 'delinquent' : 'idle'
+    addMsg(`다시 돌아왔어요! ${potatoName.value}의 ${day.value}일째를 시작해요! ☀️`)
+  }
+
+  // 새 게임 시작 (이름/생일 설정 후)
+  function newGame(name: string, bday: string) {
+    potatoName.value = name
+    birthday.value = bday
+    resetGame()
+  }
+
+  // DB에 현재 상태 저장
+  async function saveToDB() {
+    await updatePotato({
+      day: day.value,
+      dailyHp: dailyHp.value,
+      phase: phase.value,
+      ending: ending.value,
+      endingDetail: endingDetail.value,
+      constitution: stats.value.constitution,
+      intelligence: stats.value.intelligence,
+      grace: stats.value.grace,
+      charm: stats.value.charm,
+      sensitivity: stats.value.sensitivity,
+      morality: stats.value.morality,
+      mental: stats.value.mental,
+      stress: stats.value.stress,
+      money: money.value,
+      isDelinquent: isDelinquent.value,
+      kogumaEncountered: kogumaEncountered.value,
+      counts: counts.value,
+      rainEvents: rainEvents.value,
+      leaniEvents: leaniEvents.value,
+      rustleEvents: rustleEvents.value,
+    })
+  }
 
   return {
+    potatoName, birthday,
     stats, day, maxDay, dailyHp, maxDailyHp, money,
     currentActivity, phase, ending, endingDetail, chatLog,
     isDelinquent, kogumaEncountered, counts,
     rainEvents, leaniEvents, rustleEvents,
     doHighWork, doLowWork, doEducation, doRest,
-    nextDay, resetGame, resolveChoice, canAfford,
+    nextDay, resetGame, newGame, loadFromDb, saveToDB, resolveChoice, canAfford,
   }
 })

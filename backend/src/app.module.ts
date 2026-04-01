@@ -6,6 +6,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { User } from './users/user.entity';
+import { Potato } from './potato/potato.entity';
+import { PotatoModule } from './potato/potato.module';
 
 @Module({
   imports: [
@@ -19,13 +21,14 @@ import { User } from './users/user.entity';
         username: configService.get<string>('DB_USER'),
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_NAME'),
-        entities: [User],
+        entities: [User, Potato],
         synchronize: true,
       }),
       inject: [ConfigService],
     }),
     AuthModule,
     UsersModule,
+    PotatoModule,
   ],
   controllers: [AppController],
   providers: [AppService],

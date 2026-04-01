@@ -24,6 +24,9 @@ export class AuthController {
     const payload = { sub: user.id, email: user.email, username: user.username };
     return {
       access_token: this.authService.generateToken(payload),
+      id: user.id,
+      username: user.username,
+      email: user.email,
     };
   }
 }

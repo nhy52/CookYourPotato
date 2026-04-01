@@ -2,7 +2,8 @@
   <div class="game-view">
     <!-- 타이틀 -->
     <header class="game-header">
-      <span class="game-title">🥔 감자 키우기</span>
+      <span class="game-title">🥔 {{ gameStore.potatoName || '감자' }} 키우기</span>
+      <button class="logout-btn" @click="logout">로그아웃</button>
     </header>
 
     <!-- 메인 영역: 왼쪽 캔버스 + 오른쪽 패널 -->
@@ -26,6 +27,33 @@
 import PotatoCanvas  from '@/components/game/PotatoCanvas.vue'
 import GameSidePanel from '@/components/game/GameSidePanel.vue'
 import GameChatLog   from '@/components/game/GameChatLog.vue'
+import { onMounted } from 'vue'
+import { useGameStore } from '@/stores/game'
+import { useAuthStore } from '@/stores/auth'
+import { useRouter } from 'vue-router'
+import { getMyPotato } from '@/api/potato'
+
+const gameStore = useGameStore()
+const authStore = useAuthStore()
+const router = useRouter()
+
+onMounted(async () => {
+  // 새로고침 등으로 store가 초기화된 경우 DB에서 복원
+  if (!gameStore.potatoName) {
+    const potato = await getMyPotato()
+    if (potato) {
+      gameStore.loadFromDb(potato)
+    } else {
+      router.push('/setup')
+    }
+  }
+})
+
+async function logout() {
+  await gameStore.saveToDB().catch(console.error)
+  authStore.logout()
+  router.push('/login')
+}
 </script>
 
 <style scoped>
@@ -44,8 +72,21 @@ import GameChatLog   from '@/components/game/GameChatLog.vue'
   background: #8B6534;
   color: #FFF8E7;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 .game-title { font-size: 18px; font-weight: 700; letter-spacing: 1px; }
+.logout-btn {
+  background: rgba(255,248,231,0.2);
+  border: 1px solid rgba(255,248,231,0.5);
+  color: #FFF8E7;
+  padding: 4px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+}
+.logout-btn:hover { background: rgba(255,248,231,0.35); }
 
 /* 메인: 캔버스 + 사이드패널 */
 .game-main {
