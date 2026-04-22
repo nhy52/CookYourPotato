@@ -91,7 +91,7 @@ export const useGameStore = defineStore('game', () => {
   })
 
   const day = ref(1)
-  const maxDay = 30
+  const maxDay = 12
   const dailyHp = ref(10)
   const maxDailyHp = 10
   const money = ref(300) // 초기 용돈
@@ -492,37 +492,37 @@ export const useGameStore = defineStore('game', () => {
     if (s.morality <= 5 && s.stress >= 90) {
       return { name: '썩은 감자 🥀 [F 엔딩]', detail: '도덕성 0, 스트레스 MAX... 버려진 불량 감자가 되었어요.' }
     }
-    if (s.grace >= 150 && s.intelligence >= 150 && c.totalWork === 0) {
+    if (s.grace >= 80 && s.intelligence >= 80 && c.totalWork === 0) {
       return { name: '느끼 - 청담동 갤러리 도슨트 🎨 [S 엔딩]', detail: '알바 한 번 없는 순수 혈통! 왕공 무도회에 초청받았어요.' }
     }
-    if ((s.intelligence + s.grace + s.morality + s.charm) >= 280 && c.library >= 10) {
+    if ((s.intelligence + s.grace + s.morality + s.charm) >= 180 && c.library >= 6) {
       return { name: '감자샐러드 - 두 얼굴의 학생회장 🥗 [S 엔딩]', detail: '도서관 공부와 높은 복합 스탯으로 전교 학생회장이 됐어요!' }
     }
-    if (c.jog >= 15 && s.stress < 50 && s.morality >= 40) {
+    if (c.jog >= 8 && s.stress < 50 && s.morality >= 40) {
       return { name: '해쉬브라운 - 아침 7시 조깅러 🥞 [A 엔딩]', detail: '철저한 자기관리! 스트레스 낮게 유지하며 건강하게 살아요.' }
     }
-    if (c.nightGuard >= 8 && s.grace >= 60 && s.intelligence >= 60) {
+    if (c.nightGuard >= 5 && s.grace >= 40 && s.intelligence >= 40) {
       return { name: '알감자 조림 - K-직장인 대리 👔 [A 엔딩]', detail: '야간 경비 베테랑! 커피 없이는 출근 못 해요.' }
     }
-    if (s.charm >= 150 && s.morality <= 20) {
+    if (s.charm >= 100 && s.morality <= 20) {
       return { name: '로디드 프라이 - 뒷골목의 타락한 자 🍟 [B 엔딩]', detail: '주점 알바와 불량 생활... 천박하고 화려한 삶이에요.' }
     }
-    if (s.charm >= 120 && s.grace < 50) {
+    if (s.charm >= 70 && s.grace < 50) {
       return { name: '감자튀김 - 동네 최고의 인싸 🍟 [B 엔딩]', detail: '마을 광장의 인기스타! 케첩 마요 없이는 못 살아요.' }
     }
-    if (s.sensitivity >= 120 && c.street >= 5) {
+    if (s.sensitivity >= 70 && c.street >= 3) {
       return { name: '감자집 - 유리멘탈 INFP 감자 🎸 [C 엔딩]', detail: '거리 공연과 감성... 봉지 바스락 소리에 영감을 받아요.' }
     }
-    if (c.farm >= 8 && c.church >= 3 && s.morality >= 60) {
+    if (c.farm >= 5 && c.church >= 2 && s.morality >= 60) {
       return { name: '옹심이 - 시골집 투박한 막둥이 🍲 [C 엔딩]', detail: '농장과 성당을 오가는 순박하고 따뜻한 삶이에요.' }
     }
-    if (s.constitution >= 120 && s.grace <= 20 && c.mine >= 5) {
+    if (s.constitution >= 80 && s.grace <= 30 && c.mine >= 3) {
       return { name: '푸틴 - 비 오는 날의 거친 감자 🍲 [C 엔딩]', detail: '광산에서 단련된 억세고 거친 근력의 소유자예요.' }
     }
-    if (s.sensitivity >= 150 && leaniEvents.value >= 1) {
+    if (s.sensitivity >= 80 && leaniEvents.value >= 1) {
       return { name: '매쉬드 포테이토 - 정 많은 로맨티스트 🫕 [H 엔딩]', detail: '기대기 이벤트 발생! 따뜻한 감성 충만 감자예요.' }
     }
-    if (s.sensitivity >= 100 && c.arts >= 8 && rainEvents.value >= 1) {
+    if (s.sensitivity >= 60 && c.arts >= 5 && rainEvents.value >= 1) {
       return { name: '감자전 - 비 오는 날의 예술가 🥞 [H 엔딩]', detail: '비 오는 날에 영감을 받는 예술 감자예요.' }
     }
     return { name: '그냥 삶은 감자 😢 [기본 엔딩]', detail: '특별한 건 없지만... 그냥 평범하게 살아요.' }
